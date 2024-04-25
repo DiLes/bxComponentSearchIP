@@ -68,15 +68,27 @@ class CIblocListOborudovanie extends CBitrixComponent
         $entity_data_class = $entity->getDataClass();
 
         $rsData = $entity_data_class::getList(array(
-            "select" => array("*"),
-            "order" => array("ID" => "ASC"),
-            //"filter" => array("UF_PRODUCT_ID"=>"77","UF_TYPE"=>'33')  // Задаем параметры фильтра выборки
+            "select" => ["UF_IP"],
+            "order" => ["ID" => "ASC"],
         ));
 
         while($arData = $rsData->Fetch()){
             echo '<pre>'; print_r($arData); echo '</pre>';
         }
 
+        // Массив полей для добавления
+        $data = array(
+            "UF_IP" => '',
+            "UF_COUNTRY" => '',
+            "UF_REGION" => '',
+            "UF_CITY" => '',
+            "UF_LATITUDE" => '',
+            "UF_LONGITUDE" => ''
+        );
+
+        //$result = $entity_data_class::add($data);
+
+        $this->IncludeComponentTemplate();
         /*
         $res = \Bitrix\Highloadblock\HighloadBlockTable::getList(array(
             'select' => array('*', 'NAME_LANG' => 'LANG.NAME'),
@@ -95,87 +107,34 @@ class CIblocListOborudovanie extends CBitrixComponent
             }
         }*/
 
-        /*
-        // если нет валидного кеша, получаем данные из БД
-        if ($this->startResultCache()) {
+    }
 
-            $flag = true;
+    public function configureActions(): array
+    {
+        return [
+            'send' => [
+                'prefilters' => [
+                    // здесь указываются опциональные фильтры, например:
+                    new ActionFilter\Authentication(), // проверяет авторизован ли пользователь
+                ]
+            ]
+        ];
+    }
 
-            // создаем объект Query, в качестве параметра передаем объект сущности (элемент инфоблока)
-            $query = new Bitrix\Main\Entity\Query(
-                \Bitrix\Iblock\Elements\ElementOborudovanieapiTable::getEntity()
-            );
-
-            // выбираем что попадет в выборку
-            $query->setSelect(array('ID', 'NAME', 'DETAIL_TEXT', 'DETAIL_PICTURE', 'OBORUDOVANIE_' => 'OBORUDOVANIE'))
-                // ставим фильтр
-                ->setFilter(array('IBLOCK_ID' => $this->arParams['IBLOCK_ID']));
-            // выполняем запрос
-            $result = $query->exec();
-
-            // заполняем arResult
-            while ($row = $result->fetch()) {
-
-                // получаем данные картинки
-                if (!empty($row['DETAIL_PICTURE']) && $flag) {
-                    $row['DETAIL_PICTURE'] = CFile::GetFileArray($row['DETAIL_PICTURE']);
-                }
-
-                // один раз заполняем общий массив
-                if ($row && $flag) {
-                    $this->arResult = $row;
-                    $flag = false;
-                }
-
-                // если поле оборудование заполнено
-                if (!empty($row['OBORUDOVANIE_VALUE'])) {
-                    // делаем выборку хайлоуд блока
-                    $arHLBlock = HighloadBlockTable::getById($this->arParams['HL_BLOCK'])->fetch();
-                    // инициализируем класс сущности хайлоуд блока
-                    $obEntity = HighloadBlockTable::compileEntity($arHLBlock);
-                    // обращаемся к DataManager
-                    $strEntityDataClass = $obEntity->getDataClass();
-                    // стандартный запрос getList 
-                    $rsData = $strEntityDataClass::getList(array(
-                        'select' => array('*'),
-                        'order' => array($this->arParams['HL_BLOCK_SORT'] => 'ASC'),
-                        'filter' => array('=UF_XML_ID' => $row['OBORUDOVANIE_VALUE']),
-                    ));
-                    // выполняем запрос
-                    $array = $rsData->fetchALL();
-                    // получаем данные картинки
-                    $array[0]['PICTURE'] = CFile::GetFileArray($array[0]['UF_FILE']);
-                    $array[0]['ITOGO'] = $array[0]['UF_PRICE_1'] + $array[0]['UF_PRICE_2'] + $array[0]['UF_PRICE_3'] + $array[0]['UF_PRICE_4'] + $array[0]['UF_PRICE_5'];
-                    // заполняем arResult
-                    $this->arResult['OBORUDOVANIE'][] = $array[0];
-                }
-            }
-
-            // устанавливаем SEO
-            $ipropElementValues = new \Bitrix\Iblock\InheritedProperty\ElementValues($this->arParams['IBLOCK_ID'], $this->arParams['ELEMENT_ID']);
-            $this->arResult['SEO'] = $ipropElementValues->getValues();
-
-            // очищаем массив
-            unset($this->arResult['OBORUDOVANIE_VALUE'], $this->arResult['OBORUDOVANIE_ID'], $this->arResult['OBORUDOVANIE_IBLOCK_ELEMENT_ID'], $this->arResult['OBORUDOVANIE_IBLOCK_PROPERTY_ID']);
-
-            // кэш не затронет весь код ниже, он будут выполняться на каждом хите, здесь работаем с другим $arResult, будут доступны только те ключи массива, которые перечислены в вызове SetResultCacheKeys()
-            if (isset($this->arResult)) {
-                // ключи $arResult перечисленные при вызове этого метода, будут доступны в component_epilog.php и ниже по коду, обратите внимание там будет другой $arResult
-                $this->SetResultCacheKeys(
-                    array(
-                        'SEO'
-                    )
-                );
-                // подключаем шаблон и сохраняем кеш
-                $this->IncludeComponentTemplate();
-            } else { // если выяснилось что кешировать данные не требуется, прерываем кеширование и выдаем сообщение «Страница не найдена»
-                $this->AbortResultCache();
-                \Bitrix\Iblock\Component\Tools::process404(
-                    Loc::getMessage('PAGE_NOT_FOUND'),
-                    true,
-                    true
-                );
-            }
-        }*/
+    // Сюда передаются параметры из ajax запроса, навания точно такие же как и при отправке запроса.
+    // $_REQUEST['username'] будет передан в $username, $_REQUEST['email'] будет передан в $email и т.д.
+    public function sendAction($username = '', $email = '', $message = '')
+    {
+        try {
+            $this->doSomeWork();
+            return [
+                "result" => "Ваше сообщение принято",
+            ];
+        } catch (Exceptions\EmptyEmail $e) {
+            $this->errorCollection[] = new Error($e->getMessage());
+            return [
+                "result" => "Произошла ошибка",
+            ];
+        }
     }
 }
