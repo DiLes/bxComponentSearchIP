@@ -112,6 +112,28 @@ class SearchIP extends CBitrixComponent implements Controllerable
 
     }
 
+    protected function updateDB($geoData) {
+        $hlbl = 14; // Указываем ID нашего highloadblock блока к которому будет делать запросы.
+        $hlblock = HighloadBlockTable::getById($hlbl)->fetch();
+
+        $entity = HighloadBlockTable::compileEntity($hlblock);
+        $entity_data_class = $entity->getDataClass();
+
+        // Массив полей для добавления
+        $data = array(
+            "UF_IP" => $geoData['ip'],
+            "UF_COUNTRY" => $geoData['country']['name_ru'],
+            "UF_REGION" => $geoData['region']['name_ru'],
+            "UF_CITY" => $geoData['city']['name_ru'],
+            "UF_LATITUDE" => $geoData['city']['lat'],
+            "UF_LONGITUDE" => $geoData['city']['lon']
+        );
+        @file_put_contents(__DIR__ . '/geoData.txt', print_r($geoData, true));
+        echo '<pre>'; print_r($entity_data_class); echo '</pre>';
+
+        //$updateDB = $entity_data_class::update("77", $data); // где 77 -  id обновляемой записи
+    }
+
 
     public function configureActions()
     {
@@ -189,7 +211,9 @@ class SearchIP extends CBitrixComponent implements Controllerable
 
             if (!empty($geo)) {
                 $this->addDB($geo);
+                return 'Данные добавлено!!!';
             }else{
+                $this->updateDB($geo);
                 return 'IP пустое или не найдено!!!';
             }
 
