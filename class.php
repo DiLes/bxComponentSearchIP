@@ -169,6 +169,7 @@ class SearchIP extends CBitrixComponent implements Controllerable
 //        $getHeaders = $httpClient->getHeaders(); // объект Bitrix\Main\Web\HttpHeaders
 //        $error = $httpClient->getError(); // массив ошибок
         $result = $httpClient->get("http://api.sypexgeo.net/jJIRp/json/$ip");
+        @file_put_contents(__DIR__ . '/httpClient.txt', print_r($httpClient, true));
         @file_put_contents(__DIR__ . '/result.txt', print_r(json_decode($result), true));
 //        @file_put_contents(__DIR__ . '/getResult.txt', print_r($getResult, true));
 //        @file_put_contents(__DIR__ . '/getStatus.txt', print_r($getStatus, true));
@@ -192,7 +193,7 @@ class SearchIP extends CBitrixComponent implements Controllerable
                 $result,
                 true) : [];
             // Все данные о IP
-            @file_put_contents(__DIR__ . '/geo.txt', print_r($geo, true));
+            //@file_put_contents(__DIR__ . '/geo.txt', print_r($geo, true));
 
             // Выбираем нужные данные
             if ($is_bot) {

@@ -6,12 +6,7 @@ $(document).ready(
 
         if (ip) {
             var data = {
-                "ip" : ip,
-                // "country" : "",
-                // "region" : "",
-                // "city" : "",
-                // "latitude" : "",
-                // "longitude" : ""
+                "ip" : ip
             };
         }
         console.log(data, 'data');
