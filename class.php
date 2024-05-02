@@ -163,22 +163,10 @@ class SearchIP extends CBitrixComponent implements Controllerable
         $httpClient = new HttpClient();
 //        $getResult = $httpClient->getResult(); // текст ответа
 //        $getStatus = $httpClient->getStatus(); // код статуса ответа
-//        $getContentType = $httpClient->getContentType(); // Content-Type ответа
-//        $getEffectiveUrl = $httpClient->getEffectiveUrl(); // реальный url ответа, т.е. после редиректов
-//        $getCookies = $httpClient->getCookies(); // объект Bitrix\Main\Web\HttpCookies
-//        $getHeaders = $httpClient->getHeaders(); // объект Bitrix\Main\Web\HttpHeaders
 //        $error = $httpClient->getError(); // массив ошибок
         $result = $httpClient->get("http://api.sypexgeo.net/jJIRp/json/$ip");
         @file_put_contents(__DIR__ . '/httpClient.txt', print_r($httpClient, true));
         @file_put_contents(__DIR__ . '/result.txt', print_r(json_decode($result), true));
-//        @file_put_contents(__DIR__ . '/getResult.txt', print_r($getResult, true));
-//        @file_put_contents(__DIR__ . '/getStatus.txt', print_r($getStatus, true));
-//        @file_put_contents(__DIR__ . '/getContentType.txt', print_r($getContentType, true));
-//        @file_put_contents(__DIR__ . '/getEffectiveUrl.txt', print_r($getEffectiveUrl, true));
-//        @file_put_contents(__DIR__ . '/getCookies.txt', print_r($getCookies, true));
-//        @file_put_contents(__DIR__ . '/getHeaders.txt', print_r($getHeaders, true));
-//        @file_put_contents(__DIR__ . '/error.txt', print_r($error, true));
-
 
         if (!$issetIp) {
             @file_put_contents(__DIR__ . '/issetIp.txt', print_r($issetIp, true));
